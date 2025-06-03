@@ -211,14 +211,16 @@ impl<'info> BondingCurve {
             // token_out = net_amount_in * token_reserve / sol_reserve
             (net_amount_in as u128)
                 .saturating_mul(self.virtual_token_reserves as u128)
-                .checked_div(self.virtual_sol_reserves as u128)
+                .checked_div((self.virtual_sol_reserves as u128).checked_add(net_amount_in as u128)
+                    .ok_or(PumpError::OverflowOrUnderflowOccurred)?)
                 .unwrap_or(0) as u64
         } else {
             // Selling tokens: Token -> SOL
             // SOL out = net_token_in * sol_reserve / token_reserve
             (net_amount_in as u128)
                 .saturating_mul(self.virtual_sol_reserves as u128)
-                .checked_div(self.virtual_token_reserves as u128)
+                .checked_div((self.virtual_token_reserves as u128).checked_sub(net_amount_in as u128)
+                    .ok_or(PumpError::OverflowOrUnderflowOccurred)?)
                 .unwrap_or(0) as u64
         };
 

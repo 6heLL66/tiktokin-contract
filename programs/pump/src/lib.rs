@@ -10,7 +10,7 @@ pub mod utils;
 use crate::instructions::*;
 use crate::instructions::Migrate;
 
-declare_id!("GbQQb1eHf8cjFHqqsaDcUyuCZ8eFB17nXCVSvJ1kQ38Q");
+declare_id!("B9vVYVUQTkqftrYzmvj36GpraotLseR6UPz59gUktQQF");
 
 #[program]
 pub mod pump {
