@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pump.json`.
  */
 export type Pump = {
-  "address": "Cu3ZCXsVh7xC64gWH23vjDeytWC6ZGcMRVYZAka92QTq",
+  "address": "7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5",
   "metadata": {
     "name": "pump",
     "version": "0.1.0",
@@ -295,15 +295,617 @@ export type Pump = {
       ],
       "accounts": [
         {
-          "name": "payer",
+          "name": "ammProgram",
+          "address": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+        },
+        {
+          "name": "amm",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  109,
+                  109,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  109,
+                  109,
+                  32,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammOpenOrders",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  110,
+                  95,
+                  111,
+                  114,
+                  100,
+                  101,
+                  114,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammLpMint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammCoinMint"
+        },
+        {
+          "name": "ammPcMint"
+        },
+        {
+          "name": "ammCoinVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  105,
+                  110,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammPcVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  99,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammTargetOrders",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  231,
+                  175,
+                  132,
+                  116,
+                  99,
+                  232,
+                  61,
+                  1,
+                  17,
+                  152,
+                  120,
+                  186,
+                  94,
+                  24,
+                  164,
+                  143,
+                  42,
+                  111,
+                  154,
+                  213,
+                  38,
+                  209,
+                  30,
+                  51,
+                  92,
+                  129,
+                  56,
+                  1,
+                  25,
+                  175,
+                  218,
+                  253
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  114,
+                  103,
+                  101,
+                  116,
+                  95,
+                  97,
+                  115,
+                  115,
+                  111,
+                  99,
+                  105,
+                  97,
+                  116,
+                  101,
+                  100,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ammConfig",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  109,
+                  109,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103,
+                  95,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "createFeeDestination",
+          "writable": true,
+          "address": "7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5"
+        },
+        {
+          "name": "marketProgram",
+          "address": "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX"
+        },
+        {
+          "name": "market"
+        },
+        {
+          "name": "userWallet",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "userTokenCoin",
+          "writable": true
+        },
+        {
+          "name": "userTokenPc",
+          "writable": true
+        },
+        {
+          "name": "userTokenLp",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "userWallet"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "ammLpMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "sysvarRent",
+          "address": "SysvarRent111111111111111111111111111111111"
         }
       ],
       "args": [
         {
           "name": "nonce",
           "type": "u8"
+        },
+        {
+          "name": "openTime",
+          "type": "u64"
+        },
+        {
+          "name": "initPcAmount",
+          "type": "u64"
+        },
+        {
+          "name": "initCoinAmount",
+          "type": "u64"
         }
       ]
     },

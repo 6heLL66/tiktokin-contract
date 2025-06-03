@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
-use crate::amm_cpi;
+use crate::raydium_amm_cpi;
 
 #[derive(Accounts)]
 pub struct InitializeAmm<'info> {
     /// AMM программа которую мы будем вызывать
-    pub amm_program: Program<'info, amm_cpi::program::Amm>,
+    pub amm_program: Program<'info, raydium-amm-cpi::program::Amm>,
     
     /// Аккаунт AMM который будет создан
     #[account(mut)]
@@ -66,7 +66,7 @@ pub fn handler(
     // Создаем CpiContext для вызова initialize
     let cpi_ctx = CpiContext::new(
         ctx.accounts.amm_program.to_account_info(),
-        amm_cpi::Initialize2 {
+        raydium_amm_cpi::Initialize2 {
             amm: ctx.accounts.amm.to_account_info(),
             amm_authority: ctx.accounts.amm_authority.to_account_info(),
             amm_open_orders: ctx.accounts.amm_open_orders.to_account_info(),
@@ -91,7 +91,7 @@ pub fn handler(
     );
 
     // Вызываем initialize через CPI
-    amm_cpi::initialize(
+    raydium_amm_cpi::initialize(
         cpi_ctx,
         nonce,
         open_time,

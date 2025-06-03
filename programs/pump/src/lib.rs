@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+extern crate raydium_amm_cpi;
 
 pub mod consts;
 pub mod errors;
@@ -7,6 +8,7 @@ pub mod states;
 pub mod utils;
 
 use crate::instructions::*;
+use crate::instructions::Migrate;
 
 declare_id!("GbQQb1eHf8cjFHqqsaDcUyuCZ8eFB17nXCVSvJ1kQ38Q");
 
@@ -56,6 +58,6 @@ pub mod pump {
         init_pc_amount: u64,
         init_coin_amount: u64,
     ) -> Result<()> {
-        ctx.accounts.process(ctx, nonce, open_time, init_pc_amount, init_coin_amount)
+        ctx.accounts.process(nonce, open_time, init_pc_amount, init_coin_amount)
     }
 }

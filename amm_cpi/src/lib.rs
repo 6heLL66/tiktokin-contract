@@ -44,6 +44,6 @@ impl anchor_lang::Id for Amm {
     }
 }
 
-// Just to pass the compilation.
+/// CHECK: Just to pass the compilation.
 #[program]
 pub mod raydium_amm {}
