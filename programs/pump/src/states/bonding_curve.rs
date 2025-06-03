@@ -154,10 +154,10 @@ impl<'info> BondingCurve {
             signer_seeds,
             fee_lamports,
         )?;
-        //  transfer SOL to curve PDA
+        //  transfer SOL to user
         sol_transfer_with_signer(
-            &user,
             curve_pda,
+            &user,
             &system_program,
             signer_seeds,
             amount_in - fee_lamports,
@@ -198,9 +198,29 @@ impl<'info> BondingCurve {
         _direction: u8,     //  0 - buy, 1 - sell
         _fee_percent: f64,
     ) -> Result<(u64, u64)> {
-        //  implement your curve fomula
-        let amount_out = 0;
-        let fee_lamports = 0;
+        let fee_lamports = ((_amount_in as f64) * _fee_percent / 100.0).round() as u64;
+        let net_amount_in = _amount_in - fee_lamports;
+
+        if self.virtual_token_reserves == 0 || self.virtual_sol_reserves == 0 {
+            return Ok((0, fee_lamports));
+        }
+
+        let amount_out = if _direction == 0 {
+            // Buying tokens: SOL -> Token
+            // price = SOL / Token
+            // token_out = net_amount_in * token_reserve / sol_reserve
+            (net_amount_in as u128)
+                .saturating_mul(self.virtual_token_reserves as u128)
+                .checked_div(self.virtual_sol_reserves as u128)
+                .unwrap_or(0) as u64
+        } else {
+            // Selling tokens: Token -> SOL
+            // SOL out = net_token_in * sol_reserve / token_reserve
+            (net_amount_in as u128)
+                .saturating_mul(self.virtual_sol_reserves as u128)
+                .checked_div(self.virtual_token_reserves as u128)
+                .unwrap_or(0) as u64
+        };
 
         Ok((amount_out, fee_lamports))
     }
