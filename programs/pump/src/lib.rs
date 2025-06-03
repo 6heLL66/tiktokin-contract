@@ -8,7 +8,7 @@ pub mod utils;
 
 use crate::instructions::*;
 
-declare_id!("Cu3ZCXsVh7xC64gWH23vjDeytWC6ZGcMRVYZAka92QTq");
+declare_id!("GbQQb1eHf8cjFHqqsaDcUyuCZ8eFB17nXCVSvJ1kQ38Q");
 
 #[program]
 pub mod pump {
@@ -52,7 +52,10 @@ pub mod pump {
     pub fn migrate<'info>(
         ctx: Context<'_, '_, '_, 'info, Migrate<'info>>,
         nonce: u8,
+        open_time: u64,
+        init_pc_amount: u64,
+        init_coin_amount: u64,
     ) -> Result<()> {
-        ctx.accounts.process(nonce)
+        ctx.accounts.process(ctx, nonce, open_time, init_pc_amount, init_coin_amount)
     }
 }

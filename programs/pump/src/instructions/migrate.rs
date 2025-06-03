@@ -1,17 +1,8 @@
 use anchor_lang::prelude::*;
-
-#[derive(Accounts)]
-pub struct Migrate<'info> {
-    #[account(mut)]
-    payer: Signer<'info>,
-}
+use amm_cpi::{cpi::accounts::Initialize2, program::AmmApi};
 
 impl<'info> Migrate<'info> {
-    pub fn process(&mut self, _nonce: u8) -> Result<()> {
-        ////////////////////    DM if you want full implementation    ////////////////////
-        // telegram - https://t.me/microgift88
-        // discord - https://discord.com/users/1074514238325927956
-        
-        Ok(())
+    pub fn process(&mut self, ctx: CpiContext<'a, 'b, 'c, 'info, Initialize2<'info>>, nonce: u8, open_time: u64, init_pc_amount: u64, init_coin_amount: u64) -> Result<()> {
+        amm_cpi::cpi::initialize2(ctx, nonce, open_time, init_pc_amount, init_coin_amount)
     }
 }

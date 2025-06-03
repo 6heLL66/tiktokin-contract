@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-pump = "Cu3ZCXsVh7xC64gWH23vjDeytWC6ZGcMRVYZAka92QTq"
+pump = "GbQQb1eHf8cjFHqqsaDcUyuCZ8eFB17nXCVSvJ1kQ38Q"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "devnet"
 wallet = "./id.json"
 
 [scripts]
