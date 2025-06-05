@@ -1,197 +1,228 @@
 use anchor_lang::prelude::*;
-use raydium_amm_cpi::{context::Initialize2};
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::Token;
-
-pub mod create_pool_fee_address {
-    #[cfg(not(any(feature = "devnet")))]
-    anchor_lang::declare_id!("7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5");
-    #[cfg(feature = "devnet")]
-    anchor_lang::declare_id!("3XMrhbv989VxAMi3DErLV9eJht1pHppW5LbKxe9fkEFR");
-}
-
-/// openbook program id
-pub mod openbook_program_id {
-    #[cfg(not(any(feature = "devnet")))]
-    anchor_lang::declare_id!("srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX");
-    #[cfg(feature = "devnet")]
-    anchor_lang::declare_id!("EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj");
-}
+use anchor_spl::token::{Token, SyncNative};
+use anchor_spl::token_interface::{Mint, TokenInterface, TokenAccount};
+use raydium_cp_swap::{
+    cpi,
+    program::RaydiumCpSwap,
+    states::{AmmConfig, OBSERVATION_SEED, POOL_LP_MINT_SEED, POOL_SEED, POOL_VAULT_SEED},
+};
+use crate::states::BondingCurve;
+use crate::pda_accounts::LiquidityPda;
+use crate::utils::{sol_transfer_with_signer, token_transfer_with_signer, sol_transfer_with_pda_signer};
 
 #[derive(Accounts)]
 pub struct Migrate<'info> {
-    pub amm_program: Program<'info, raydium_amm_cpi::Amm>,
-    /// CHECK: This is the Raydium AMM program ID, which is a known and verified program
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"amm_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm: UncheckedAccount<'info>,
-    /// CHECK: Safe. Amm authority, a PDA create with seed = [b"amm authority"]
-    #[account(
-        seeds = [b"amm authority"],
-        bump,
-    )]
-    pub amm_authority: UncheckedAccount<'info>,
-    /// CHECK: Safe. Amm open_orders Account, a PDA create with seed = [program_id, openbook_market_id, b"open_order_associated_seed"]
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"open_order_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm_open_orders: UncheckedAccount<'info>,
-    /// CHECK: Safe. Pool lp mint account. Must be empty, owned by $authority.
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"lp_mint_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm_lp_mint: UncheckedAccount<'info>,
-    /// CHECK: Safe. Coin mint account
-    #[account(
-        owner = token_program.key()
-    )]
-    pub amm_coin_mint: UncheckedAccount<'info>,
-    /// CHECK: Safe. Pc mint account
-    #[account(
-        owner = token_program.key()
-    )]
-    pub amm_pc_mint: UncheckedAccount<'info>,
-    /// CHECK: Safe. amm_coin_vault Account. Must be non zero, owned by $authority
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"coin_vault_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm_coin_vault: UncheckedAccount<'info>,
-    /// CHECK: Safe. amm_pc_vault Account. Must be non zero, owned by $authority.
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"pc_vault_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm_pc_vault: UncheckedAccount<'info>,
-    /// CHECK: Safe. amm_target_orders Account. Must be non zero, owned by $authority.
-    #[account(
-        mut,
-        seeds = [
-            crate::id().as_ref(),
-            market.key.as_ref(),
-            b"target_associated_seed",
-        ],
-        bump,
-    )]
-    pub amm_target_orders: UncheckedAccount<'info>,
-    /// CHECK: Safe. Amm Config.
-    #[account(
-        seeds = [b"amm_config_account_seed"],
-        bump,
-    )]
-    pub amm_config: UncheckedAccount<'info>,
-    /// CHECK: Safe. Amm create_fee_destination.
-    #[account(
-        mut,
-        address = create_pool_fee_address::id(),
-    )]
-    pub create_fee_destination: UncheckedAccount<'info>,
-    /// CHECK: Safe. OpenBook program.
-    #[account(
-        address = openbook_program_id::id(),
-    )]
-    pub market_program: UncheckedAccount<'info>,
-    /// CHECK: Safe. OpenBook market. OpenBook program is the owner.
-    #[account(
-        owner = market_program.key(),
-    )]
-    pub market: UncheckedAccount<'info>,
-    /// CHECK: Safe. The user wallet create the pool
     #[account(mut)]
-    pub user_wallet: Signer<'info>,
-    /// CHECK: Safe. The user coin token
+    pub creator: Signer<'info>,
+
+    pub cp_swap_program: Program<'info, RaydiumCpSwap>,
+
+    /// Which config the pool belongs to.
+    pub amm_config: Box<Account<'info, AmmConfig>>,
+
+    /// CHECK: liquidity pda
     #[account(
         mut,
-        owner = token_program.key(),
+        seeds = [LiquidityPda::SEED_PREFIX.as_bytes(), &token_1_mint.key().to_bytes()],
+        bump
     )]
-    pub user_token_coin: UncheckedAccount<'info>,
-    /// CHECK: Safe. The user pc token
+    liquidity_pda: Box<Account<'info, LiquidityPda>>,
+
+    /// CHECK: curve token ata
     #[account(
         mut,
-        owner = token_program.key(),
+        token::mint = token_1_mint,
+        token::authority = liquidity_pda,  // PDA владеет токенами
     )]
-    pub user_token_pc: UncheckedAccount<'info>,
-    /// CHECK: Safe. The user lp token
+    pub liquidity_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
+
+    /// CHECK: pool vault and lp mint authority
+    #[account(
+        seeds = [
+            raydium_cp_swap::AUTH_SEED.as_bytes(),
+        ],
+        seeds::program = cp_swap_program,
+        bump,
+    )]
+    pub authority: UncheckedAccount<'info>,
+
+    /// CHECK: Initialize an account to store the pool state, init by cp-swap
     #[account(
         mut,
         seeds = [
-            &user_wallet.key().to_bytes(),
-            &token_program.key().to_bytes(),
-            &amm_lp_mint.key.to_bytes(),
-            ],
+            POOL_SEED.as_bytes(),
+            amm_config.key().as_ref(),
+            token_0_mint.key().as_ref(),
+            token_1_mint.key().as_ref(),
+        ],
+        seeds::program = cp_swap_program,
         bump,
     )]
-    pub user_token_lp: UncheckedAccount<'info>,
-    /// CHECK: Safe. The spl token program
+    pub pool_state: UncheckedAccount<'info>,
+
+    /// Token_0 mint, the key must smaller then token_1 mint.
+    #[account(
+        constraint = token_0_mint.key() < token_1_mint.key(),
+        mint::token_program = token_0_program,
+    )]
+    pub token_0_mint: Box<InterfaceAccount<'info, Mint>>,
+
+    /// Token_1 mint, the key must grater then token_0 mint.
+    #[account(
+        mint::token_program = token_1_program,
+    )]
+    pub token_1_mint: Box<InterfaceAccount<'info, Mint>>,
+
+    /// CHECK: pool lp mint, init by cp-swap
+    #[account(
+        mut,
+        seeds = [
+            POOL_LP_MINT_SEED.as_bytes(),
+            pool_state.key().as_ref(),
+        ],
+        seeds::program = cp_swap_program,
+        bump,
+    )]
+    pub lp_mint: UncheckedAccount<'info>,
+
+    /// payer token0 account - принадлежит curve PDA
+    #[account(
+        mut,
+        token::mint = token_0_mint,
+        token::authority = creator,  // PDA владеет токенами
+    )]
+    pub creator_token_0: Box<InterfaceAccount<'info, TokenAccount>>,
+
+    /// creator token1 account - принадлежит curve PDA
+    #[account(
+        mut,
+        token::mint = token_1_mint,
+        token::authority = creator,  // PDA владеет токенами
+    )]
+    pub creator_token_1: Box<InterfaceAccount<'info, TokenAccount>>,
+
+    /// CHECK: creator lp ATA token account, init by cp-swap
+    #[account(mut)]
+    pub creator_lp_token: UncheckedAccount<'info>,
+
+    /// CHECK: Token_0 vault for the pool, init by cp-swap
+    #[account(
+        mut,
+        seeds = [
+            POOL_VAULT_SEED.as_bytes(),
+            pool_state.key().as_ref(),
+            token_0_mint.key().as_ref()
+        ],
+        seeds::program = cp_swap_program,
+        bump,
+    )]
+    pub token_0_vault: UncheckedAccount<'info>,
+
+    /// CHECK: Token_1 vault for the pool, init by cp-swap
+    #[account(
+        mut,
+        seeds = [
+            POOL_VAULT_SEED.as_bytes(),
+            pool_state.key().as_ref(),
+            token_1_mint.key().as_ref()
+        ],
+        seeds::program = cp_swap_program,
+        bump,
+    )]
+    pub token_1_vault: UncheckedAccount<'info>,
+
+    /// create pool fee account
+    #[account(
+        mut,
+        address= raydium_cp_swap::create_pool_fee_reveiver::ID,
+    )]
+    pub create_pool_fee: Box<InterfaceAccount<'info, TokenAccount>>,
+
+    /// CHECK: an account to store oracle observations, init by cp-swap
+    #[account(
+        mut,
+        seeds = [
+            OBSERVATION_SEED.as_bytes(),
+            pool_state.key().as_ref(),
+        ],
+        seeds::program = cp_swap_program,
+        bump,
+    )]
+    pub observation_state: UncheckedAccount<'info>,
+
+    #[account(
+        mut,
+        seeds = [BondingCurve::SEED_PREFIX.as_bytes(), token_1_mint.key().as_ref()],
+        bump,
+    )]
+    bonding_curve: Box<Account<'info, BondingCurve>>,
+
+    /// Program to create mint account and mint tokens
     pub token_program: Program<'info, Token>,
-    /// CHECK: Safe. The associated token program
+    /// Spl token program or token program 2022
+    pub token_0_program: Interface<'info, TokenInterface>,
+    /// Spl token program or token program 2022
+    pub token_1_program: Interface<'info, TokenInterface>,
+    /// Program to create an ATA for receiving position NFT
     pub associated_token_program: Program<'info, AssociatedToken>,
-    /// CHECK: Safe. System program
+    /// To create a new program account
     pub system_program: Program<'info, System>,
-    /// CHECK: Safe. Rent program
-    pub sysvar_rent: Sysvar<'info, Rent>,
+    /// Sysvar for program account
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> Migrate<'info> {
-    pub fn process(&mut self, nonce: u8, open_time: u64, init_pc_amount: u64, init_coin_amount: u64) -> Result<()> {
-        let cpi_accounts = Initialize2 {
-            amm: self.amm.clone(),
-            amm_authority: self.amm_authority.clone(),
-            amm_open_orders: self.amm_open_orders.clone(),
-            amm_lp_mint: self.amm_lp_mint.clone(),
-            amm_coin_mint: self.amm_coin_mint.clone(),
-            amm_pc_mint: self.amm_pc_mint.clone(),
-            amm_coin_vault: self.amm_coin_vault.clone(),
-            amm_pc_vault: self.amm_pc_vault.clone(),
-            amm_target_orders: self.amm_target_orders.clone(),
-            amm_config: self.amm_config.clone(),
-            create_fee_destination: self.create_fee_destination.clone(),
-            market_program: self.market_program.clone(),
-            market: self.market.clone(),
-            user_wallet: self.user_wallet.clone(),
-            user_token_coin: self.user_token_coin.clone(),
-            user_token_pc: self.user_token_pc.clone(),
-            user_token_lp: self.user_token_lp.clone(),
-            token_program: self.token_program.clone(),
-            system_program: self.system_program.clone(),
-            sysvar_rent: self.sysvar_rent.clone(),
-            associated_token_program: self.associated_token_program.clone(),
+    pub fn process(&mut self, open_time: u64, bump_liquidity: u8) -> Result<()> {
+        let curve_pda = self.bonding_curve.to_account_info();
+        let token_mint_key = self.token_1_mint.key();
+        let signer_seeds: &[&[&[u8]]] = &[&LiquidityPda::get_signer(&token_mint_key, &bump_liquidity)];
+
+        token_transfer_with_signer(
+            &self.liquidity_token_ata.to_account_info(),
+            &self.liquidity_pda.to_account_info(),
+            &self.creator_token_1.to_account_info(),
+            &self.system_program.to_account_info(),
+            signer_seeds,
+            self.bonding_curve.real_token_reserves,
+        )?;
+
+        sol_transfer_with_pda_signer(
+            &self.liquidity_pda.to_account_info(),
+            &self.creator.to_account_info(),
+            self.bonding_curve.real_sol_reserves,
+        )?;
+
+        anchor_spl::token::sync_native(CpiContext::new(
+            self.token_program.to_account_info(),
+            SyncNative {
+                account: self.creator_token_0.to_account_info(),
+            }
+        ))?;
+
+        let cpi_accounts = cpi::accounts::Initialize {
+            creator: self.creator.to_account_info(),
+            amm_config: self.amm_config.to_account_info(),
+            authority: self.authority.to_account_info(),
+            pool_state: self.pool_state.to_account_info(),
+            token_0_mint: self.token_0_mint.to_account_info(),
+            token_1_mint: self.token_1_mint.to_account_info(),
+            lp_mint: self.lp_mint.to_account_info(),
+            creator_token_0: self.creator_token_0.to_account_info(),
+            creator_token_1: self.creator_token_1.to_account_info(),
+            creator_lp_token: self.creator_lp_token.to_account_info(),
+            token_0_vault: self.token_0_vault.to_account_info(),
+            token_1_vault: self.token_1_vault.to_account_info(),
+            create_pool_fee: self.create_pool_fee.to_account_info(),
+            observation_state: self.observation_state.to_account_info(),
+            token_program: self.token_program.to_account_info(),
+            token_0_program: self.token_0_program.to_account_info(),
+            token_1_program: self.token_1_program.to_account_info(),
+            associated_token_program: self.associated_token_program.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+            rent: self.rent.to_account_info(),
         };
-
-        let cpi_ctx = CpiContext::new(
-            self.amm_program.to_account_info(),
-            cpi_accounts
-        );
-
-        raydium_amm_cpi::instructions::initialize(cpi_ctx, nonce, open_time, init_pc_amount, init_coin_amount)
+        let cpi_context = CpiContext::new(self.cp_swap_program.to_account_info(), cpi_accounts).with_remaining_accounts(vec![self.liquidity_pda.to_account_info()]);
+        cpi::initialize(cpi_context, self.bonding_curve.real_sol_reserves, self.bonding_curve.real_token_reserves, open_time)
     }
 }

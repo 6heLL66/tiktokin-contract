@@ -49,6 +49,17 @@ pub fn sol_transfer_with_signer<'info>(
     Ok(())
 }
 
+pub fn sol_transfer_with_pda_signer<'info>(
+    source: &AccountInfo<'info>,
+    destination: &AccountInfo<'info>,
+    amount: u64,
+) -> Result<()> {
+    source.sub_lamports(amount)?;
+    destination.add_lamports(amount)?;
+
+    Ok(())
+}
+
 //  transfer token from user
 pub fn token_transfer_user<'info>(
     from: &AccountInfo<'info>,
@@ -92,3 +103,4 @@ pub fn token_transfer_with_signer<'info>(
 
     Ok(())
 }
+

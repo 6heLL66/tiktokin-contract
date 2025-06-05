@@ -13,10 +13,15 @@ no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
-default = []
+devnet = []
+default = ["devnet"]
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]
 anchor-lang = { version="0.31.0", features = ["init-if-needed"] }
 anchor-spl = { version="0.31.0", features = ["metadata"] }
-raydium-amm-cpi = { path = "../../amm_cpi" }
+raydium-cp-swap = { git = "https://github.com/raydium-io/raydium-cp-swap", features = [
+    "no-entrypoint",
+    "devnet",
+    "cpi",
+] }

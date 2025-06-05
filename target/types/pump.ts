@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pump.json`.
  */
 export type Pump = {
-  "address": "7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5",
+  "address": "B9vVYVUQTkqftrYzmvj36GpraotLseR6UPz59gUktQQF",
   "metadata": {
     "name": "pump",
     "version": "0.1.0",
@@ -152,13 +152,39 @@ export type Pump = {
           }
         },
         {
-          "name": "curveTokenAccount",
+          "name": "liquidityPda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "liquidityTokenAta",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "bondingCurve"
+                "path": "liquidityPda"
               },
               {
                 "kind": "const",
@@ -295,616 +321,373 @@ export type Pump = {
       ],
       "accounts": [
         {
-          "name": "ammProgram",
-          "address": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
-        },
-        {
-          "name": "amm",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  109,
-                  109,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  109,
-                  109,
-                  32,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammOpenOrders",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  111,
-                  112,
-                  101,
-                  110,
-                  95,
-                  111,
-                  114,
-                  100,
-                  101,
-                  114,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammLpMint",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  108,
-                  112,
-                  95,
-                  109,
-                  105,
-                  110,
-                  116,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammCoinMint"
-        },
-        {
-          "name": "ammPcMint"
-        },
-        {
-          "name": "ammCoinVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  105,
-                  110,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammPcVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  99,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammTargetOrders",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  150,
-                  221,
-                  255,
-                  221,
-                  47,
-                  124,
-                  250,
-                  73,
-                  186,
-                  122,
-                  222,
-                  39,
-                  34,
-                  190,
-                  229,
-                  184,
-                  196,
-                  136,
-                  120,
-                  30,
-                  239,
-                  203,
-                  155,
-                  253,
-                  95,
-                  39,
-                  160,
-                  94,
-                  229,
-                  240,
-                  120,
-                  200
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  97,
-                  114,
-                  103,
-                  101,
-                  116,
-                  95,
-                  97,
-                  115,
-                  115,
-                  111,
-                  99,
-                  105,
-                  97,
-                  116,
-                  101,
-                  100,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "ammConfig",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  109,
-                  109,
-                  95,
-                  99,
-                  111,
-                  110,
-                  102,
-                  105,
-                  103,
-                  95,
-                  97,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116,
-                  95,
-                  115,
-                  101,
-                  101,
-                  100
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "createFeeDestination",
-          "writable": true,
-          "address": "7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5"
-        },
-        {
-          "name": "marketProgram",
-          "address": "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX"
-        },
-        {
-          "name": "market"
-        },
-        {
-          "name": "userWallet",
+          "name": "creator",
           "writable": true,
           "signer": true
         },
         {
-          "name": "userTokenCoin",
-          "writable": true
+          "name": "cpSwapProgram",
+          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
         },
         {
-          "name": "userTokenPc",
-          "writable": true
+          "name": "ammConfig",
+          "docs": [
+            "Which config the pool belongs to."
+          ]
         },
         {
-          "name": "userTokenLp",
+          "name": "liquidityPda",
           "writable": true,
           "pda": {
             "seeds": [
               {
-                "kind": "account",
-                "path": "userWallet"
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  105,
+                  116,
+                  121
+                ]
               },
               {
                 "kind": "account",
-                "path": "tokenProgram"
+                "path": "token1Mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "liquidityTokenAta",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  110,
+                  100,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "poolState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
               },
               {
                 "kind": "account",
-                "path": "ammLpMint"
+                "path": "ammConfig"
+              },
+              {
+                "kind": "account",
+                "path": "token0Mint"
+              },
+              {
+                "kind": "account",
+                "path": "token1Mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "token0Mint",
+          "docs": [
+            "Token_0 mint, the key must smaller then token_1 mint."
+          ]
+        },
+        {
+          "name": "token1Mint",
+          "docs": [
+            "Token_1 mint, the key must grater then token_0 mint."
+          ]
+        },
+        {
+          "name": "lpMint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poolState"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "creatorToken0",
+          "docs": [
+            "payer token0 account - принадлежит curve PDA"
+          ],
+          "writable": true
+        },
+        {
+          "name": "creatorToken1",
+          "docs": [
+            "creator token1 account - принадлежит curve PDA"
+          ],
+          "writable": true
+        },
+        {
+          "name": "creatorLpToken",
+          "writable": true
+        },
+        {
+          "name": "token0Vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poolState"
+              },
+              {
+                "kind": "account",
+                "path": "token0Mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "token1Vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poolState"
+              },
+              {
+                "kind": "account",
+                "path": "token1Mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "createPoolFee",
+          "docs": [
+            "create pool fee account"
+          ],
+          "writable": true,
+          "address": "G11FKBRaAkHAKuLCgLM6K6NUc9rTjPAznRCjZifrTQe2"
+        },
+        {
+          "name": "observationState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  98,
+                  115,
+                  101,
+                  114,
+                  118,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poolState"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "bondingCurve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  45,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token1Mint"
               }
             ]
           }
         },
         {
           "name": "tokenProgram",
+          "docs": [
+            "Program to create mint account and mint tokens"
+          ],
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
+          "name": "token0Program",
+          "docs": [
+            "Spl token program or token program 2022"
+          ]
+        },
+        {
+          "name": "token1Program",
+          "docs": [
+            "Spl token program or token program 2022"
+          ]
+        },
+        {
           "name": "associatedTokenProgram",
+          "docs": [
+            "Program to create an ATA for receiving position NFT"
+          ],
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "systemProgram",
+          "docs": [
+            "To create a new program account"
+          ],
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "sysvarRent",
+          "name": "rent",
+          "docs": [
+            "Sysvar for program account"
+          ],
           "address": "SysvarRent111111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "nonce",
-          "type": "u8"
-        },
-        {
           "name": "openTime",
-          "type": "u64"
-        },
-        {
-          "name": "initPcAmount",
-          "type": "u64"
-        },
-        {
-          "name": "initCoinAmount",
           "type": "u64"
         }
       ]
@@ -987,16 +770,39 @@ export type Pump = {
           }
         },
         {
-          "name": "tokenMint"
+          "name": "liquidityPda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
+              }
+            ]
+          }
         },
         {
-          "name": "curveTokenAccount",
+          "name": "liquidityTokenAccount",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "bondingCurve"
+                "path": "liquidityPda"
               },
               {
                 "kind": "const",
@@ -1078,6 +884,9 @@ export type Pump = {
               ]
             }
           }
+        },
+        {
+          "name": "tokenMint"
         },
         {
           "name": "userTokenAccount",
@@ -1200,6 +1009,19 @@ export type Pump = {
   ],
   "accounts": [
     {
+      "name": "ammConfig",
+      "discriminator": [
+        218,
+        244,
+        33,
+        104,
+        203,
+        203,
+        43,
+        111
+      ]
+    },
+    {
       "name": "bondingCurve",
       "discriminator": [
         23,
@@ -1223,6 +1045,19 @@ export type Pump = {
         250,
         204,
         130
+      ]
+    },
+    {
+      "name": "liquidityPda",
+      "discriminator": [
+        165,
+        80,
+        252,
+        167,
+        23,
+        85,
+        10,
+        23
       ]
     }
   ],
@@ -1256,9 +1091,100 @@ export type Pump = {
       "code": 6005,
       "name": "curveAlreadyCompleted",
       "msg": "Curve is already completed"
+    },
+    {
+      "code": 6006,
+      "name": "invalidCpSwapProgram",
+      "msg": "Invalid CP Swap program"
     }
   ],
   "types": [
+    {
+      "name": "ammConfig",
+      "docs": [
+        "Holds the current owner of the factory"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "Bump to identify PDA"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "disableCreatePool",
+            "docs": [
+              "Status to control if new pool can be create"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "Config index"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "tradeFeeRate",
+            "docs": [
+              "The trade fee, denominated in hundredths of a bip (10^-6)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocolFeeRate",
+            "docs": [
+              "The protocol fee"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fundFeeRate",
+            "docs": [
+              "The fund fee, denominated in hundredths of a bip (10^-6)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createPoolFee",
+            "docs": [
+              "Fee for create a new pool"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocolOwner",
+            "docs": [
+              "Address of the protocol fee owner"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fundOwner",
+            "docs": [
+              "Address of the fund fee owner"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "bondingCurve",
       "type": {
@@ -1337,6 +1263,13 @@ export type Pump = {
             "type": "f64"
           }
         ]
+      }
+    },
+    {
+      "name": "liquidityPda",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     }
   ]

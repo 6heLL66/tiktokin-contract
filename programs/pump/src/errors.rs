@@ -19,4 +19,7 @@ pub enum PumpError {
 
     #[msg("Curve is already completed")]
     CurveAlreadyCompleted,
+
+    #[msg("Invalid CP Swap program")]
+    InvalidCpSwapProgram,
 }

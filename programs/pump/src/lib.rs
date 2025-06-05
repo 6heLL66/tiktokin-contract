@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
-extern crate raydium_amm_cpi;
 
 pub mod consts;
 pub mod errors;
 pub mod instructions;
 pub mod states;
 pub mod utils;
+pub mod pda_accounts;
 
 use crate::instructions::*;
 use crate::instructions::Migrate;
@@ -43,7 +43,7 @@ pub mod pump {
         min_out: u64,
     ) -> Result<()> {
         ctx.accounts
-            .process(amount, direction, min_out, ctx.bumps.bonding_curve)
+            .process(amount, direction, min_out, ctx.bumps.liquidity_pda)
     }
 
     ////////////////////    DM if you want full implementation  ////////////////////
@@ -53,11 +53,8 @@ pub mod pump {
     //  migrate the token to raydium once a curve reaches the limit
     pub fn migrate<'info>(
         ctx: Context<'_, '_, '_, 'info, Migrate<'info>>,
-        nonce: u8,
         open_time: u64,
-        init_pc_amount: u64,
-        init_coin_amount: u64,
-    ) -> Result<()> {
-        ctx.accounts.process(nonce, open_time, init_pc_amount, init_coin_amount)
+    ) -> Result<()> {        
+        ctx.accounts.process(open_time, ctx.bumps.liquidity_pda)
     }
 }

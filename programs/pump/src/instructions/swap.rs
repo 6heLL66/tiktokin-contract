@@ -6,6 +6,7 @@ use anchor_spl::{
     associated_token::{self, AssociatedToken},
     token::{self, Mint, Token, TokenAccount},
 };
+use crate::pda_accounts::LiquidityPda;
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
@@ -25,17 +26,25 @@ pub struct Swap<'info> {
     #[account(
         mut,
         seeds = [BondingCurve::SEED_PREFIX.as_bytes(), &token_mint.key().to_bytes()],
-        bump
+        bump,
     )]
     bonding_curve: Box<Account<'info, BondingCurve>>,
-    
-    token_mint: Box<Account<'info, Mint>>,
+
+    #[account(
+        mut,
+        seeds = [LiquidityPda::SEED_PREFIX.as_bytes(), &token_mint.key().to_bytes()],
+        bump
+    )]
+    liquidity_pda: Box<Account<'info, LiquidityPda>>,
+
     #[account(
         mut,
         associated_token::mint = token_mint,
-        associated_token::authority = bonding_curve
+        associated_token::authority = liquidity_pda
     )]
-    curve_token_account: Box<Account<'info, TokenAccount>>,
+    liquidity_token_account: Box<Account<'info, TokenAccount>>,
+    
+    pub token_mint: Box<Account<'info, Mint>>,
     #[account(
         init_if_needed,
         payer = user,
@@ -60,7 +69,7 @@ impl<'info> Swap<'info> {
         direction: u8,
         min_out: u64,
 
-        bump_bonding_curve: u8,
+        bump_liquidity: u8,
     ) -> Result<()> {
         let bonding_curve = &mut self.bonding_curve;
 
@@ -80,13 +89,14 @@ impl<'info> Swap<'info> {
                 global_config.curve_limit,
                 &self.user,
                 curve_pda,
+                &mut self.liquidity_pda.to_account_info(),
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
-                &mut self.curve_token_account.to_account_info(),
+                &mut self.liquidity_token_account.to_account_info(),
                 amount,
                 min_out,
                 global_config.buy_fee_percent,
-                bump_bonding_curve,
+                bump_liquidity,
                 &self.system_program.to_account_info(),
                 &self.token_program.to_account_info()
             )?;
@@ -96,13 +106,14 @@ impl<'info> Swap<'info> {
                 &self.token_mint,
                 &self.user,
                 curve_pda,
+                &mut self.liquidity_pda.to_account_info(),
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
-                &mut self.curve_token_account.to_account_info(),
+                &mut self.liquidity_token_account.to_account_info(),
                 amount,
                 min_out,
                 global_config.sell_fee_percent,
-                bump_bonding_curve,
+                bump_liquidity,
                 &self.system_program.to_account_info(),
                 &self.token_program.to_account_info()
             )?;

@@ -2,6 +2,7 @@ use crate::{
     consts::TOKEN_DECIMAL,
     states::{BondingCurve, Config},
 };
+use crate::pda_accounts::LiquidityPda;
 use anchor_lang::{prelude::*, solana_program::sysvar::SysvarId, system_program};
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
@@ -39,13 +40,23 @@ pub struct Launch<'info> {
         bump
     )]
     bonding_curve: Box<Account<'info, BondingCurve>>,
+
+    #[account(
+        init,
+        payer = creator,
+        space = 8 + LiquidityPda::LEN,
+        seeds = [LiquidityPda::SEED_PREFIX.as_bytes(), &token_mint.key().to_bytes()],
+        bump
+    )]
+    liquidity_pda: Box<Account<'info, LiquidityPda>>,
+
     #[account(
         init,
         payer = creator,
         associated_token::mint = token_mint,
-        associated_token::authority = bonding_curve
+        associated_token::authority = liquidity_pda
     )]
-    curve_token_account: Box<Account<'info, TokenAccount>>,
+    liquidity_token_ata: Box<Account<'info, TokenAccount>>,
 
     /// CHECK: initialized by token metadata program
     #[account(mut)]
@@ -91,13 +102,13 @@ impl<'info> Launch<'info> {
 
         let signer_seeds: &[&[&[u8]]] = &[&[Config::SEED_PREFIX.as_bytes(), &[bump_config]]];
 
-        //  mint token to bonding curve
+        //  mint token to liquidity pda
         token::mint_to(
             CpiContext::new_with_signer(
                 self.token_program.to_account_info(),
                 token::MintTo {
                     mint: self.token_mint.to_account_info(),
-                    to: self.curve_token_account.to_account_info(),
+                    to: self.liquidity_token_ata.to_account_info(),
                     authority: global_config.to_account_info(),
                 },
                 signer_seeds,
