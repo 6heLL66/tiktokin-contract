@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Token, SyncNative};
 use anchor_spl::token_interface::{Mint, TokenInterface, TokenAccount};
+use crate::errors::PumpError;
 use raydium_cp_swap::{
     cpi,
     program::RaydiumCpSwap,
@@ -177,6 +178,11 @@ impl<'info> Migrate<'info> {
         let curve_pda = self.bonding_curve.to_account_info();
         let token_mint_key = self.token_1_mint.key();
         let signer_seeds: &[&[&[u8]]] = &[&LiquidityPda::get_signer(&token_mint_key, &bump_liquidity)];
+
+        require!(
+            self.bonding_curve.is_completed == true,
+            PumpError::CurveNotCompleted
+        );
 
         token_transfer_with_signer(
             &self.liquidity_token_ata.to_account_info(),

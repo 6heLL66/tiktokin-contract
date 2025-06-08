@@ -1090,6 +1090,11 @@
       "code": 6006,
       "name": "InvalidCpSwapProgram",
       "msg": "Invalid CP Swap program"
+    },
+    {
+      "code": 6007,
+      "name": "CurveNotCompleted",
+      "msg": "Curve is not completed"
     }
   ],
   "types": [

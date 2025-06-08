@@ -1096,6 +1096,11 @@ export type Pump = {
       "code": 6006,
       "name": "invalidCpSwapProgram",
       "msg": "Invalid CP Swap program"
+    },
+    {
+      "code": 6007,
+      "name": "curveNotCompleted",
+      "msg": "Curve is not completed"
     }
   ],
   "types": [
