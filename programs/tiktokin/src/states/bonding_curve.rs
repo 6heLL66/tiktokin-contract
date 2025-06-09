@@ -164,7 +164,9 @@ impl<'info> BondingCurve {
         fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
 
         user_ata: &mut AccountInfo<'info>, //  associated toke accounts for user
+        user_token_0_account: &mut AccountInfo<'info>, //  user token 0 account
         liquidity_ata: &mut AccountInfo<'info>, //  associated toke accounts for liquidity
+        liquidity_pda_token_0_account: &mut AccountInfo<'info>, //  liquidity PDA token 0 account
 
         amount_in: u64,      //  tokens amount to pay
         min_amount_out: u64, //  minimum amount out
@@ -193,7 +195,7 @@ impl<'info> BondingCurve {
         msg!("Transferring fee {} to recipient {}", fee_lamports, fee_recipient.key);
         sol_transfer_from_user(&user, fee_recipient, system_program, fee_lamports)?;
 
-        msg!("Transferring tokens {} from user to curve", amount_out);
+        msg!("Transferring tokens {} from user to curve", amount_in);
         token_transfer_user(
             user_ata,
             user,
@@ -202,10 +204,20 @@ impl<'info> BondingCurve {
             amount_in,
         )?;
 
-        msg!("Transferring SOL {} to user {}", amount_in - fee_lamports, user.key);
-        sol_transfer_with_pda_signer(
+        anchor_spl::token::sync_native(CpiContext::new(
+            token_program.to_account_info(),
+            anchor_spl::token::SyncNative {
+                account: liquidity_pda_token_0_account.to_account_info(),
+            },
+        ))?;
+
+        msg!("Transferring SOL {} to user {}", amount_out - fee_lamports, user.key);
+        token_transfer_with_signer(
+            liquidity_pda_token_0_account,
             liquidity_pda,
-            &user,
+            user_token_0_account,
+            token_program,
+            signer_seeds,
             amount_out - fee_lamports,
         )?;
 

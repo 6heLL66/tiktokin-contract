@@ -66,6 +66,14 @@ pub struct Swap<'info> {
     )]
     liquidity_pda_token_0_account: Box<Account<'info, TokenAccount>>,
 
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = native_mint,
+        associated_token::authority = user
+    )]
+    user_token_0_account: Box<Account<'info, TokenAccount>>,
+
     #[account(address = token::ID)]
     token_program: Program<'info, Token>,
     #[account(address = associated_token::ID)]
@@ -123,7 +131,9 @@ impl<'info> Swap<'info> {
                 &mut self.liquidity_pda.to_account_info(),
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
+                &mut self.user_token_0_account.to_account_info(),
                 &mut self.liquidity_token_account.to_account_info(),
+                &mut self.liquidity_pda_token_0_account.to_account_info(),
                 amount,
                 min_out,
                 global_config.sell_fee_percent,
