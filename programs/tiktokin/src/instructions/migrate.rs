@@ -159,6 +159,13 @@ pub struct Migrate<'info> {
     )]
     bonding_curve: Box<Account<'info, BondingCurve>>,
 
+    #[account(
+        mut,
+        associated_token::mint = token_0_mint,
+        associated_token::authority = liquidity_pda
+    )]
+    liquidity_pda_token_0_account: Box<InterfaceAccount<'info, TokenAccount>>,
+
     /// Program to create mint account and mint tokens
     pub token_program: Program<'info, Token>,
     /// Spl token program or token program 2022
@@ -183,6 +190,12 @@ impl<'info> Migrate<'info> {
             self.bonding_curve.is_completed == true,
             PumpError::CurveNotCompleted
         );
+        anchor_spl::token::sync_native(CpiContext::new(
+            self.token_0_program.to_account_info(),
+            anchor_spl::token::SyncNative {
+                account: self.liquidity_pda_token_0_account.to_account_info(),
+            },
+        ))?;
 
         token_transfer_with_signer(
             &self.liquidity_token_ata.to_account_info(),
@@ -193,18 +206,15 @@ impl<'info> Migrate<'info> {
             self.bonding_curve.real_token_reserves,
         )?;
 
-        sol_transfer_with_pda_signer(
+        //  transfer wsol from liquidity pda to creator
+        token_transfer_with_signer(
+            &self.liquidity_pda_token_0_account.to_account_info(),
             &self.liquidity_pda.to_account_info(),
-            &self.creator.to_account_info(),
+            &self.creator_token_0.to_account_info(),
+            &self.system_program.to_account_info(),
+            signer_seeds,
             self.bonding_curve.real_sol_reserves,
         )?;
-
-        anchor_spl::token::sync_native(CpiContext::new(
-            self.token_program.to_account_info(),
-            SyncNative {
-                account: self.creator_token_0.to_account_info(),
-            }
-        ))?;
 
         let cpi_accounts = cpi::accounts::Initialize {
             creator: self.creator.to_account_info(),
@@ -228,10 +238,14 @@ impl<'info> Migrate<'info> {
             system_program: self.system_program.to_account_info(),
             rent: self.rent.to_account_info(),
         };
-        let cpi_context = CpiContext::new(self.cp_swap_program.to_account_info(), cpi_accounts).with_remaining_accounts(vec![self.liquidity_pda.to_account_info()]);
+        let cpi_context = CpiContext::new(self.cp_swap_program.to_account_info(), cpi_accounts).with_remaining_accounts(vec![self.liquidity_pda.to_account_info(), self.liquidity_pda_token_0_account.to_account_info()]);
         cpi::initialize(cpi_context, self.bonding_curve.real_sol_reserves, self.bonding_curve.real_token_reserves, open_time)?;
 
-        // Burn LP tokens after migration
+        // Get LP token balance by deserializing the account after initialization
+        let lp_token = TokenAccount::try_deserialize(&mut &self.creator_lp_token.data.borrow()[..])?;
+        let lp_balance = lp_token.amount;
+        
+        // Burn exact amount of LP tokens
         let burn_ctx = CpiContext::new(
             self.token_program.to_account_info(),
             Burn {
@@ -240,7 +254,7 @@ impl<'info> Migrate<'info> {
                 authority: self.creator.to_account_info(),
             },
         );
-        anchor_spl::token::burn(burn_ctx, u64::MAX)?;
+        anchor_spl::token::burn(burn_ctx, lp_balance)?;
 
         Ok(())
     }

@@ -93,6 +93,7 @@ impl<'info> Launch<'info> {
         bonding_curve.virtual_sol_reserves = global_config.initial_virtual_sol_reserves;
         bonding_curve.real_token_reserves = global_config.initial_real_token_reserves;
         bonding_curve.real_sol_reserves = 0;
+        bonding_curve.fees_collected = 0;
         bonding_curve.token_total_supply = global_config.total_token_supply;
         bonding_curve.is_completed = false;
 

@@ -4,11 +4,12 @@
 resolution = true
 skip-lint = false
 
-[programs.devnet]
-pump = "B9vVYVUQTkqftrYzmvj36GpraotLseR6UPz59gUktQQF"
-
 [registry]
 url = "https://api.apr.dev"
+
+[programs.devnet]
+tiktoken = "DveezyD6efYCAmGa5SUAZiLaVFZZvxazKFs4yVzwydqB"
+
 
 [provider]
 cluster = "devnet"

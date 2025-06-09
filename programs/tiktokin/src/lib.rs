@@ -10,7 +10,7 @@ pub mod pda_accounts;
 use crate::instructions::*;
 use crate::instructions::Migrate;
 
-declare_id!("B9vVYVUQTkqftrYzmvj36GpraotLseR6UPz59gUktQQF");
+declare_id!("DveezyD6efYCAmGa5SUAZiLaVFZZvxazKFs4yVzwydqB");
 
 #[program]
 pub mod pump {

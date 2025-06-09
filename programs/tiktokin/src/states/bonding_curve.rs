@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
+use anchor_spl::token;
 
 use crate::errors::PumpError;
 use crate::utils::{sol_transfer_from_user, sol_transfer_with_signer, token_transfer_user, token_transfer_with_signer, sol_transfer_with_pda_signer};
@@ -26,7 +27,7 @@ pub struct BondingCurve {
 
 impl<'info> BondingCurve {
     pub const SEED_PREFIX: &'static str = "bonding-curve";
-    pub const LEN: usize = 8 * 5 + 1;
+    pub const LEN: usize = 8 * 6 + 1;
 
     //  get signer for bonding curve PDA
     pub fn get_signer<'a>(mint: &'a Pubkey, bump: &'a u8) -> [&'a [u8]; 3] {
@@ -62,6 +63,7 @@ impl<'info> BondingCurve {
 
         curve_pda: &mut AccountInfo<'info>, 
         liquidity_pda: &mut AccountInfo<'info>, //  liquidity PDA
+        liquidity_pda_token_0_account: &mut AccountInfo<'info>, //  liquidity PDA token 0 account
         fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
 
         user_ata: &mut AccountInfo<'info>, //  associated toke accounts for user
@@ -107,6 +109,12 @@ impl<'info> BondingCurve {
             token_program,
             signer_seeds,
             amount_out,
+        )?;
+
+        sol_transfer_with_pda_signer(
+            liquidity_pda,
+            liquidity_pda_token_0_account,
+            amount_in - fee_lamports,
         )?;
 
         //  calculate new reserves
@@ -167,11 +175,6 @@ impl<'info> BondingCurve {
         system_program: &AccountInfo<'info>, //  system program
         token_program: &AccountInfo<'info>,  //  token program
     ) -> Result<()> {
-        require!(
-            self.is_completed == false,
-            PumpError::CurveCompleted
-        );
-
         let (amount_out, fee_lamports) =
             self.calc_amount_out_for_sell(amount_in, fee_percent)?;
 

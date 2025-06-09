@@ -6,6 +6,7 @@ use anchor_spl::{
     associated_token::{self, AssociatedToken},
     token::{self, Mint, Token, TokenAccount},
 };
+use anchor_spl::token::spl_token::native_mint::id as native_mint_id;
 use crate::pda_accounts::LiquidityPda;
 
 #[derive(Accounts)]
@@ -53,6 +54,18 @@ pub struct Swap<'info> {
     )]
     user_token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: This is the native mint and is owned by the token program
+    #[account(address = native_mint_id())]
+    pub native_mint: AccountInfo<'info>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = native_mint,
+        associated_token::authority = liquidity_pda
+    )]
+    liquidity_pda_token_0_account: Box<Account<'info, TokenAccount>>,
+
     #[account(address = token::ID)]
     token_program: Program<'info, Token>,
     #[account(address = associated_token::ID)]
@@ -90,6 +103,7 @@ impl<'info> Swap<'info> {
                 &self.user,
                 curve_pda,
                 &mut self.liquidity_pda.to_account_info(),
+                &mut self.liquidity_pda_token_0_account.to_account_info(),
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
                 &mut self.liquidity_token_account.to_account_info(),
