@@ -1101,6 +1101,11 @@ export type Pump = {
       "code": 6007,
       "name": "curveNotCompleted",
       "msg": "Curve is not completed"
+    },
+    {
+      "code": 6008,
+      "name": "curveCompleted",
+      "msg": "Curve is completed"
     }
   ],
   "types": [

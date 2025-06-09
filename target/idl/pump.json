@@ -1095,6 +1095,11 @@
       "code": 6007,
       "name": "CurveNotCompleted",
       "msg": "Curve is not completed"
+    },
+    {
+      "code": 6008,
+      "name": "CurveCompleted",
+      "msg": "Curve is completed"
     }
   ],
   "types": [

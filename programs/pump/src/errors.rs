@@ -25,4 +25,7 @@ pub enum PumpError {
 
     #[msg("Curve is not completed")]
     CurveNotCompleted,
+
+    #[msg("Curve is completed")]
+    CurveCompleted,
 }

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{Token, SyncNative};
+use anchor_spl::token::{Token, SyncNative, Burn};
 use anchor_spl::token_interface::{Mint, TokenInterface, TokenAccount};
 use crate::errors::PumpError;
 use raydium_cp_swap::{
@@ -229,6 +229,19 @@ impl<'info> Migrate<'info> {
             rent: self.rent.to_account_info(),
         };
         let cpi_context = CpiContext::new(self.cp_swap_program.to_account_info(), cpi_accounts).with_remaining_accounts(vec![self.liquidity_pda.to_account_info()]);
-        cpi::initialize(cpi_context, self.bonding_curve.real_sol_reserves, self.bonding_curve.real_token_reserves, open_time)
+        cpi::initialize(cpi_context, self.bonding_curve.real_sol_reserves, self.bonding_curve.real_token_reserves, open_time)?;
+
+        // Burn LP tokens after migration
+        let burn_ctx = CpiContext::new(
+            self.token_program.to_account_info(),
+            Burn {
+                mint: self.lp_mint.to_account_info(),
+                from: self.creator_lp_token.to_account_info(),
+                authority: self.creator.to_account_info(),
+            },
+        );
+        anchor_spl::token::burn(burn_ctx, u64::MAX)?;
+
+        Ok(())
     }
 }
