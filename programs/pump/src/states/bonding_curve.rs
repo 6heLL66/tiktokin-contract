@@ -19,6 +19,9 @@ pub struct BondingCurve {
 
     //  true - if the curve reached the limit
     pub is_completed: bool,
+
+    //  fees collected
+    pub fees_collected: u64,
 }
 
 impl<'info> BondingCurve {
@@ -83,6 +86,8 @@ impl<'info> BondingCurve {
         
         let (amount_out, fee_lamports) =
             self.calc_amount_out_for_buy(amount_in, fee_percent)?;
+
+        self.fees_collected = self.fees_collected.checked_add(fee_lamports).ok_or(PumpError::OverflowOrUnderflowOccurred)?;
 
         //  check min amount out
         require!(
@@ -169,6 +174,8 @@ impl<'info> BondingCurve {
 
         let (amount_out, fee_lamports) =
             self.calc_amount_out_for_sell(amount_in, fee_percent)?;
+
+        self.fees_collected = self.fees_collected.checked_add(fee_lamports).ok_or(PumpError::OverflowOrUnderflowOccurred)?;
         
         msg!("Calculated amount_out: {}, fee_lamports: {}", amount_out, fee_lamports);
 

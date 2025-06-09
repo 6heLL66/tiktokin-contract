@@ -1223,6 +1223,10 @@ export type Pump = {
           {
             "name": "isCompleted",
             "type": "bool"
+          },
+          {
+            "name": "feesCollected",
+            "type": "u64"
           }
         ]
       }

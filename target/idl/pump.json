@@ -1217,6 +1217,10 @@
           {
             "name": "is_completed",
             "type": "bool"
+          },
+          {
+            "name": "fees_collected",
+            "type": "u64"
           }
         ]
       }
