@@ -78,11 +78,6 @@ impl<'info> BondingCurve {
         system_program: &AccountInfo<'info>, //  system program
         token_program: &AccountInfo<'info>,  //  token program
     ) -> Result<bool> {
-        require!(
-            self.is_completed == false,
-            PumpError::CurveCompleted
-        );
-
         let token = token_mint.key();
         let signer_seeds: &[&[&[u8]]] = &[&crate::pda_accounts::LiquidityPda::get_signer(&token, &liquidity_bump)];
         
